@@ -14,7 +14,7 @@ cd mailing-list-app
 ### 2. Install Dependencies
 ```bash
 composer install
-npm install && npm run build
+npm install && npm dev build
 ```
 ### 3. Create Environment File
 ```bash
@@ -31,10 +31,23 @@ touch database/database.sqlite
 Update .env:
 ```bash
 DB_CONNECTION=sqlite
-DB_DATABASE=/absolute/path/to/your/project/database/database.sqlite
+DB_DATABASE=database/database.sqlite
 ```
-Or configure for MySQL if preferred.
+Or configure for MySQL if preferred. 
 
+Fix: Create & Set Up Necessary Directories
+
+Run the following commands from your project root:
+```bash
+mkdir -p storage/framework/{sessions,views,cache,data}
+chmod -R 775 storage/framework
+```
+Clear Laravel’s Cache
+```bash
+php artisan cache:clear
+php artisan config:clear
+php artisan view:clear
+```
 ### 5. Run Migrations and Seeders (Optional)
 ```bash
 php artisan migrate

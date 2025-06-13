@@ -1,4 +1,6 @@
 *
 !private/
 !public/
+!templates
+!contact_templates.csv
 !.gitignore

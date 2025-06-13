@@ -14,7 +14,7 @@ cd mailing-list-app
 ### 2. Install Dependencies
 ```bash
 composer install
-npm install && npm dev build
+npm install && npm run
 ```
 ### 3. Create Environment File
 ```bash
@@ -33,10 +33,8 @@ Update .env:
 DB_CONNECTION=sqlite
 DB_DATABASE=database/database.sqlite
 ```
-Or configure for MySQL if preferred. 
 
 Fix: Create & Set Up Necessary Directories
-
 Run the following commands from your project root:
 ```bash
 mkdir -p storage/framework/{sessions,views,cache,data}

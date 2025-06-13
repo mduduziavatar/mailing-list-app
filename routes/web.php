@@ -42,3 +42,6 @@ Route::get('/campaigns/{id}/edit', [CampaignController::class, 'edit']);
 Route::put('/campaigns/{id}', [CampaignController::class, 'update']);
 Route::delete('/campaigns/{id}', [CampaignController::class, 'destroy']);
 Route::get('/dashboard', [DashboardController::class, 'index']);
+Route::get('/log', function () {
+    return file_get_contents(storage_path('logs/laravel.log'));
+});

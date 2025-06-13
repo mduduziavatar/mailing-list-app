@@ -29,7 +29,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 # Copy application files
-COPY storage/app/templates/contact-template.csv storage/app/templates/contact-template.csv
+COPY . .
+
 # Ensure required Laravel directories exist
 RUN mkdir -p /opt/render/project/src/database && \
     touch /opt/render/project/src/database/database.sqlite && \

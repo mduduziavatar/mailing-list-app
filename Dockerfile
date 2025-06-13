@@ -1,17 +1,25 @@
-# Start from the official PHP image with common extensions
+# syntax=docker/dockerfile:1
+
 FROM php:8.2-cli
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     unzip \
-    libzip-dev \
-    sqlite3 \
-    libsqlite3-dev \
     git \
-    curl
-
-# Install PHP extensions
-RUN docker-php-ext-install pdo pdo_sqlite zip
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    zlib1g-dev \
+    libzip-dev \
+    libsqlite3-dev \
+    pkg-config \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install \
+        gd \
+        pdo \
+        pdo_sqlite \
+        zip \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -19,18 +27,14 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy app files
+# Copy project files
 COPY . .
 
-# Install dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Install PHP dependencies
+RUN composer install
 
-# Create SQLite database file
-RUN mkdir -p database && touch database/database.sqlite
+# Expose application port (if needed)
+EXPOSE 8000
 
-# Generate key and run migrations
-RUN php artisan key:generate
-RUN php artisan migrate --force
-
-# Serve using PHP built-in server
-CMD php -S 0.0.0.0:8000 -t public
+# Default command
+CMD ["php", "-S", "0.0.0.0:8000", "-t", "public"]

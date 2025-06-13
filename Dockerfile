@@ -11,8 +11,8 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     zlib1g-dev \
     libzip-dev \
+    libonig-dev \
     libsqlite3-dev \
-    pkg-config \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install \
         gd \
@@ -30,19 +30,24 @@ WORKDIR /var/www/html
 # Copy project files
 COPY . .
 
-# Ensure SQLite database and Laravel paths
-RUN mkdir -p database && touch database/database.sqlite \
-    && cp .env.example .env \
-    && mkdir -p storage bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
+# Create SQLite database and Laravel env
+RUN mkdir -p database && \
+    touch database/database.sqlite && \
+    cp .env.example .env && \
+    mkdir -p storage/framework/views storage/framework/cache storage/logs bootstrap/cache && \
+    chmod -R 775 storage bootstrap/cache
 
-# Install dependencies and set up Laravel
-RUN composer install --no-dev --optimize-autoloader \
-    && php artisan key:generate \
-    && php artisan migrate --force
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader
 
-# Expose port
+# Generate application key
+RUN php artisan key:generate
+
+# Run migrations
+RUN php artisan migrate --force
+
+# Expose Laravel app port
 EXPOSE 8000
 
-# Start the Laravel app
+# Start Laravel app
 CMD ["php", "-S", "0.0.0.0:8000", "-t", "public"]

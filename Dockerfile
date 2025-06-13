@@ -1,5 +1,6 @@
 # syntax=docker/dockerfile:1
 
+# Use PHP base image with required extensions
 FROM php:8.2-cli
 
 # Install system dependencies and PHP extensions
@@ -11,8 +12,8 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     zlib1g-dev \
     libzip-dev \
-    libonig-dev \
     libsqlite3-dev \
+    pkg-config \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install \
         gd \
@@ -24,30 +25,32 @@ RUN apt-get update && apt-get install -y \
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
+# Set the working directory
 WORKDIR /var/www/html
 
-# Copy project files
+# Copy application files
 COPY . .
 
-# Create SQLite database and Laravel env
-RUN mkdir -p database && \
-    touch database/database.sqlite && \
-    cp .env.example .env && \
+# Ensure required Laravel directories exist
+RUN mkdir -p /opt/render/project/src/database && \
+    touch /opt/render/project/src/database/database.sqlite && \
     mkdir -p storage/framework/views storage/framework/cache storage/logs bootstrap/cache && \
     chmod -R 775 storage bootstrap/cache
+
+# Copy .env.example to .env (used for config and key generation)
+RUN cp .env.example .env
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Generate application key
+# Generate Laravel app key
 RUN php artisan key:generate
 
-# Run migrations
+# Run database migrations
 RUN php artisan migrate --force
 
-# Expose Laravel app port
+# Expose Laravel's default port
 EXPOSE 8000
 
-# Start Laravel app
+# Start the Laravel development server
 CMD ["php", "-S", "0.0.0.0:8000", "-t", "public"]

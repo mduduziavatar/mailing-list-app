@@ -1,8 +1,9 @@
 # syntax=docker/dockerfile:1
 
+# Use official PHP image with CLI
 FROM php:8.2-cli
 
-# Install system dependencies
+# Install system dependencies and PHP extensions
 RUN apt-get update && apt-get install -y \
     unzip \
     git \
@@ -27,14 +28,28 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy project files
+# Copy application source
 COPY . .
 
-# Install PHP dependencies
-RUN composer install
+# Ensure SQLite database file exists
+RUN mkdir -p database && touch database/database.sqlite
 
-# Expose application port (if needed)
+# Ensure Laravel cache and storage folders exist and are writable
+RUN mkdir -p storage bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader
+
+# Generate Laravel application key
+RUN php artisan key:generate
+
+# Run database migrations (optional for fresh deploy)
+RUN php artisan migrate --force
+
+# Expose port for PHP development server
 EXPOSE 8000
 
-# Default command
+# Start Laravel with built-in PHP server
 CMD ["php", "-S", "0.0.0.0:8000", "-t", "public"]

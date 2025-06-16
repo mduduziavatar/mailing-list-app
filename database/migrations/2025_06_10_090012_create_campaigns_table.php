@@ -13,9 +13,12 @@ return new class extends Migration
     {
         Schema::create('campaigns', function (Blueprint $table) {
             $table->id();
-            $table->string('subject');
-            $table->text('message');
+            $table->string('name')->nullable(); 
+            $table->text('message')->nullable();
+            $table->string('subject')->nullable(); 
             $table->foreignId('contact_list_id')->constrained()->onDelete('cascade');
+            $table->date('start_date')->nullable(); 
+            $table->date('end_date')->nullable();   
             $table->timestamps();
         });
     }

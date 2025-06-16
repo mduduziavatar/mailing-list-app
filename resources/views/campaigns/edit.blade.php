@@ -1,66 +1,76 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Campaign</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://unpkg.com/trix/dist/trix.css">
-    <script src="https://unpkg.com/trix/dist/trix.js"></script>
-</head>
-<body class="bg-gray-50 p-6">
-@include('layouts.nav')
+# Mailing List App
 
-<div class="max-w-xl mx-auto">
-    <h1 class="text-2xl font-bold mb-4">✏️ Edit Campaign</h1>
+## Setup Instructions
 
-    {{-- Flash messages --}}
-    @if(session('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded mb-4">
-            {{ session('success') }}
-        </div>
-    @endif
+1. Clone the repository:
 
-    @if(session('error'))
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4">
-            {{ session('error') }}
-        </div>
-    @endif
+   ```
+   git clone <repo-url>
+   cd mailing-list-app
+   ```
 
-    @if($errors->any())
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4">
-            {{ $errors->first() }}
-        </div>
-    @endif
+2. Install dependencies:
 
-    {{-- Update Campaign --}}
-    <form method="POST" action="{{ url('/campaigns/' . $campaign->id) }}">
-        @csrf
-        @method('PUT')
+   ```
+   composer install
+   npm install
+   npm run dev
+   ```
 
-        <label class="block mb-1 font-semibold">Subject</label>
-        <input type="text" name="subject" value="{{ old('subject', $campaign->subject) }}" class="w-full border mb-3 px-3 py-2 rounded">
+3. Copy `.env.example` to `.env` and configure your database and other settings.
 
-        <label class="block mb-1 font-semibold">Message</label>
-        <input type="text" name="message" value="{{ old('message', $campaign->message) }}" class="w-full border mb-3 px-3 py-2 rounded">
-        
+4. Generate application key:
 
-        <label class="block mb-1 font-semibold">Contact List</label>
-        <select name="contact_list_id" class="w-full border px-3 py-2 rounded mb-4">
-            @foreach($lists as $list)
-                <option value="{{ $list->id }}" {{ $campaign->contact_list_id == $list->id ? 'selected' : '' }}>{{ $list->name }}</option>
-            @endforeach
-        </select>
+   ```
+   php artisan key:generate
+   ```
 
-        <div class="flex justify-between">
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Update</button>
-        </div>
-    </form>
+5. Run migrations and seeders:
 
-    {{-- Delete Campaign - OUTSIDE the update form --}}
-    <form method="POST" action="{{ url('/campaigns/' . $campaign->id) }}" class="mt-4">
-        @csrf
-        @method('DELETE')
-        <button type="submit" onclick="return confirm('Are you sure?')" class="text-red-600 hover:underline">🗑️ Delete Campaign</button>
-    </form>
-</div>
-</body>
-</html>
+   ```
+   php artisan migrate:fresh --seed
+   ```
+
+6. Serve the application:
+
+   ```
+   php artisan serve
+   ```
+
+## Database and Models
+
+- The app manages Contacts, Contact Lists, and Campaigns.
+- Campaigns belong to a Contact List (`contact_list_id`).
+- Campaigns have the following important fields:
+  - `subject` (string)
+  - `message` (text)
+  - `start_date` (date)
+  - `end_date` (date)
+  - `contact_list_id` (foreign key)
+
+## Important Notes
+
+- Make sure `start_date` and `end_date` are included in the `fillable` array in `app/Models/Campaign.php`.
+- The CampaignSeeder seeds campaigns with random start and end dates.
+- The edit campaign form supports editing the start and end dates.
+- The campaign listing page displays the subject, associated list, and start/end dates.
+
+## Usage
+
+- Use the UI to create, edit, and delete campaigns.
+- Export campaigns via the export button on the campaigns listing page.
+
+## Troubleshooting
+
+- If you encounter errors with missing factory methods, ensure your models use the `HasFactory` trait.
+- Run `composer dump-autoload` if classes aren't recognized.
+- Clear caches with:
+  ```
+  php artisan config:clear
+  php artisan cache:clear
+  php artisan view:clear
+  ```
+
+## License
+
+Specify your license here.

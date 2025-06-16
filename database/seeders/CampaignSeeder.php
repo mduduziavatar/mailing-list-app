@@ -5,27 +5,21 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Campaign;
 use App\Models\ContactList;
+use Illuminate\Support\Carbon;
 
 class CampaignSeeder extends Seeder
 {
     public function run(): void
     {
-        $list = ContactList::first(); 
-        if (!$list) {
-            echo "❗ No Contact List found. Please create a list first.";
-            return;
-        }
+        $lists = ContactList::all();
 
-        Campaign::create([
-            'subject' => '🎉 Welcome to our newsletter',
-            'message' => 'Thanks for joining our list! Stay tuned for updates.',
-            'contact_list_id' => $list->id,
-        ]);
-
-        Campaign::create([
-            'subject' => '🔥 Limited Time Offer',
-            'message' => 'Use code SPRING10 for 10% off your next purchase.',
-            'contact_list_id' => $list->id,
-        ]);
+        Campaign::factory()->count(5)->create([
+            'contact_list_id' => $lists->random()->id,
+        ])->each(function ($campaign) {
+            $campaign->update([
+                'start_date' => Carbon::now()->addDays(rand(1, 5)),
+                'end_date' => Carbon::now()->addDays(rand(6, 10)),
+            ]);
+        });
     }
 }
